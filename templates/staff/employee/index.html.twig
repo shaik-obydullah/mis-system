@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Employees{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Employees</h1>
+    <a href="{{ path('employee_new') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>New employee</a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Phone</th>
+                    <th class="text-end">Base salary</th>
+                    <th>Hired</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for employee in employees %}
+                    <tr>
+                        <td>{{ employee.name }}</td>
+                        <td>{{ employee.role|capitalize }}</td>
+                        <td>{{ employee.phone ?? '—' }}</td>
+                        <td class="text-end">{{ employee.baseSalary|money }}</td>
+                        <td>{{ employee.hireDate|date('Y-m-d') }}</td>
+                        <td>
+                            {% if employee.active %}<span class="badge bg-success">Active</span>
+                            {% else %}<span class="badge bg-secondary">Inactive</span>{% endif %}
+                        </td>
+                        <td class="text-end">
+                            <a href="{{ path('employee_edit', {'id': employee.id}) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+                            <form action="{{ path('employee_delete', {'id': employee.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Remove {{ employee.name }}?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_employee_' ~ employee.id) }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="7" class="text-center text-muted py-4">No employees yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

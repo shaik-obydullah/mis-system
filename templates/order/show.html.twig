@@ -1,0 +1,132 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Order {{ order.orderNo }}{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Order {{ order.orderNo }}</h1>
+    <div>
+        <a href="{{ path('order_index') }}" class="btn btn-outline-secondary">Back</a>
+        <a href="{{ path('order_invoice', {'id': order.id}) }}" class="btn btn-outline-primary" target="_blank"><i class="bi bi-file-pdf me-1"></i>Invoice</a>
+        {% if order.status == 'open' %}
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#payModal"><i class="bi bi-check-lg me-1"></i>Record payment</button>
+            <form action="{{ path('order_cancel', {'id': order.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Cancel this order and restore stock?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('order_cancel_' ~ order.id) }}">
+                <button type="submit" class="btn btn-outline-danger"><i class="bi bi-x-lg me-1"></i>Cancel</button>
+            </form>
+        {% elseif order.status == 'paid' %}
+            <form action="{{ path('order_refund', {'id': order.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Refund this order and restore stock?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('order_refund_' ~ order.id) }}">
+                <button type="submit" class="btn btn-outline-danger"><i class="bi bi-arrow-counterclockwise me-1"></i>Refund</button>
+            </form>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header">Items</div>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th class="text-end">Qty</th>
+                            <th class="text-end">Unit price</th>
+                            <th class="text-end">Line total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.items %}
+                            <tr>
+                                <td>{{ item.product.name }} <small class="text-muted">({{ item.product.sku }})</small></td>
+                                <td class="text-end">{{ item.quantity }}</td>
+                                <td class="text-end">{{ item.unitPrice|money }}</td>
+                                <td class="text-end">{{ item.lineTotal|money }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-end">Subtotal</td>
+                            <td class="text-end">{{ order.subtotal|money }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-end">Tax</td>
+                            <td class="text-end">{{ order.tax|money }}</td>
+                        </tr>
+                        <tr class="fw-bold">
+                            <td colspan="3" class="text-end">Total</td>
+                            <td class="text-end">{{ order.total|money }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-header">Details</div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between">
+                    <span class="text-muted">Status</span>
+                    <span>
+                        {% if order.status == 'paid' %}<span class="badge bg-success">Paid</span>
+                        {% elseif order.status == 'open' %}<span class="badge bg-warning text-dark">Open</span>
+                        {% elseif order.status == 'cancelled' %}<span class="badge bg-secondary">Cancelled</span>
+                        {% elseif order.status == 'refunded' %}<span class="badge bg-danger">Refunded</span>
+                        {% endif %}
+                    </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span class="text-muted">Payment</span>
+                    <span>{{ order.paymentMethod ? order.paymentMethod|capitalize : '—' }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span class="text-muted">Customer</span>
+                    <span>{{ order.customer ?? '—' }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span class="text-muted">Created by</span>
+                    <span>{{ order.createdBy.fullName }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span class="text-muted">Created</span>
+                    <span>{{ order.createdAt|date('Y-m-d H:i') }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span class="text-muted">Paid at</span>
+                    <span>{{ order.paidAt ? order.paidAt|date('Y-m-d H:i') : '—' }}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="payModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" action="{{ path('order_pay', {'id': order.id}) }}" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Record payment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="_token" value="{{ csrf_token('order_pay_' ~ order.id) }}">
+                <label for="payment_method" class="form-label">Payment method</label>
+                <select id="payment_method" name="payment_method" class="form-select">
+                    <option value="cash" selected>Cash</option>
+                    <option value="card">Card</option>
+                    <option value="online">Online</option>
+                </select>
+                <p class="text-muted mt-3 mb-0">Total due: <strong>{{ order.total|money }}</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-success">Confirm payment</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

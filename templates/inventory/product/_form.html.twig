@@ -1,0 +1,57 @@
+{% set product = product|default(null) %}
+
+<div class="card shadow-sm mb-3">
+    <div class="card-header">Product information</div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label for="name" class="form-label">Name *</label>
+                <input type="text" id="name" name="name" value="{{ product.name ?? '' }}" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+                <label for="sku" class="form-label">SKU *</label>
+                <input type="text" id="sku" name="sku" value="{{ product.sku ?? '' }}" class="form-control" required>
+            </div>
+            <div class="col-md-4">
+                <label for="category" class="form-label">Category</label>
+                <select id="category" name="category" class="form-select">
+                    <option value="">— None —</option>
+                    {% for c in categories %}
+                        <option value="{{ c.id }}" {% if product is not null and product.category is not null and product.category.id == c.id %}selected{% endif %}>{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="supplier" class="form-label">Supplier</label>
+                <select id="supplier" name="supplier" class="form-select">
+                    <option value="">— None —</option>
+                    {% for s in suppliers %}
+                        <option value="{{ s.id }}" {% if product is not null and product.supplier is not null and product.supplier.id == s.id %}selected{% endif %}>{{ s.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="price" class="form-label">Price</label>
+                <input type="number" step="0.01" min="0" id="price" name="price" value="{{ product.price ?? '0' }}" class="form-control">
+            </div>
+            <div class="col-md-2">
+                <label for="cost" class="form-label">Cost</label>
+                <input type="number" step="0.01" min="0" id="cost" name="cost" value="{{ product.cost ?? '0' }}" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label for="current_stock" class="form-label">Current stock</label>
+                <input type="number" step="0.001" min="0" id="current_stock" name="current_stock" value="{{ product.currentStock ?? '0' }}" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label for="low_stock_threshold" class="form-label">Low stock threshold</label>
+                <input type="number" step="0.001" min="0" id="low_stock_threshold" name="low_stock_threshold" value="{{ product.lowStockThreshold ?? '5' }}" class="form-control">
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="active" name="active" value="1" {% if product is null or product.active %}checked{% endif %}>
+                    <label class="form-check-label" for="active">Active (can be sold)</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

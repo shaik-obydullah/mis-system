@@ -1,0 +1,192 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Reports{% endblock %}
+
+{% block body %}
+<h1 class="h3 mb-4">Reports</h1>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" action="{{ path('report_index') }}" class="row g-2 align-items-end">
+            <div class="col-auto">
+                <label for="from" class="form-label small mb-1">From</label>
+                <input type="date" id="from" name="from" value="{{ from }}" class="form-control form-control-sm">
+            </div>
+            <div class="col-auto">
+                <label for="to" class="form-label small mb-1">To</label>
+                <input type="date" id="to" name="to" value="{{ to }}" class="form-control form-control-sm">
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-sm btn-outline-primary">Generate</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-2">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="text-muted small">Sales</div>
+                <div class="fs-5 fw-semibold">{{ report.sales|money }}</div>
+                <div class="text-muted small">{{ report.orders }} order(s)</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-2">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="text-muted small">COGS</div>
+                <div class="fs-5 fw-semibold">{{ report.cogs|money }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-2">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="text-muted small">Gross profit</div>
+                <div class="fs-5 fw-semibold text-success">{{ report.gross_profit|money }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-2">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="text-muted small">Expenses</div>
+                <div class="fs-5 fw-semibold text-danger">{{ report.expenses|money }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-2">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="text-muted small">Net profit</div>
+                <div class="fs-5 fw-semibold">{{ report.net_profit|money }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-2">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="text-muted small">Gross margin</div>
+                <div class="fs-5 fw-semibold">{{ report.sales > 0 ? (report.gross_profit / report.sales * 100)|round(1) : 0 }}%</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">Sales by day</div>
+            <div class="card-body">
+                <canvas id="salesChart" height="110"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">Sales by category</div>
+            <div class="card-body">
+                <canvas id="categoryChart" height="110"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">Expenses by category</div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in expenseBreakdown %}
+                            <tr>
+                                <td>{{ row.category }}</td>
+                                <td class="text-end">{{ row.total|money }}</td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="2" class="text-center text-muted py-4">No expenses in range.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">Top products</div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th class="text-end">Qty sold</th>
+                            <th class="text-end">Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in topProducts %}
+                            <tr>
+                                <td>{{ row.name }}</td>
+                                <td class="text-end">{{ row.qty }}</td>
+                                <td class="text-end">{{ row.revenue|money }}</td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="3" class="text-center text-muted py-4">No sales in range.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+    const salesLabels = {{ salesByDay|map(d => d.date)|json_encode|raw }};
+    const salesData = {{ salesByDay|map(d => d.total)|json_encode|raw }};
+
+    new Chart(document.getElementById('salesChart'), {
+        type: 'bar',
+        data: {
+            labels: salesLabels,
+            datasets: [{
+                label: 'Sales',
+                data: salesData,
+                backgroundColor: 'rgba(13, 110, 253, 0.7)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
+    const catLabels = {{ salesByCategory|map(c => c.category)|json_encode|raw }};
+    const catData = {{ salesByCategory|map(c => c.total)|json_encode|raw }};
+
+    new Chart(document.getElementById('categoryChart'), {
+        type: 'doughnut',
+        data: {
+            labels: catLabels,
+            datasets: [{
+                data: catData,
+                backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#0dcaf0', '#6f42c1', '#fd7e14', '#20c997']
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,9 @@
+twig:
+    file_name_pattern: '*.twig'
+    globals:
+        settings: '@App\Service\SettingsService'
+        notification_service: '@App\Service\NotificationService'
+
+when@test:
+    twig:
+        strict_variables: true

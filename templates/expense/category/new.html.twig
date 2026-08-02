@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Expense Category{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">New Expense Category</h1>
+    <a href="{{ path('expense_category_index') }}" class="btn btn-outline-secondary">Back</a>
+</div>
+
+<div class="card shadow-sm" style="max-width: 600px;">
+    <div class="card-body">
+        <form method="post" action="{{ path('expense_category_new') }}">
+            <div class="mb-3">
+                <label for="name" class="form-label">Name *</label>
+                <input type="text" id="name" name="name" class="form-control" required autofocus>
+            </div>
+            <button type="submit" class="btn btn-primary">Create category</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

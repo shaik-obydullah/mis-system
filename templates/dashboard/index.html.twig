@@ -1,0 +1,198 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block body %}
+<h1 class="h3 mb-4">Dashboard</h1>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-start border-primary border-4 shadow-sm">
+            <div class="card-body">
+                <div class="text-muted small">Today's Sales</div>
+                <div class="fs-4 fw-semibold">{{ dashboard.today_sales|money }}</div>
+                <div class="text-muted small">{{ dashboard.today_orders }} order(s)</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-start border-success border-4 shadow-sm">
+            <div class="card-body">
+                <div class="text-muted small">Today's Profit</div>
+                <div class="fs-4 fw-semibold">{{ dashboard.today_profit|money }}</div>
+                <div class="text-muted small">Expenses: {{ dashboard.today_expenses|money }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-start border-info border-4 shadow-sm">
+            <div class="card-body">
+                <div class="text-muted small">This Month Sales</div>
+                <div class="fs-4 fw-semibold">{{ dashboard.month_sales|money }}</div>
+                <div class="text-muted small">{{ dashboard.month_orders }} order(s)</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-start border-warning border-4 shadow-sm">
+            <div class="card-body">
+                <div class="text-muted small">This Month Profit</div>
+                <div class="fs-4 fw-semibold">{{ dashboard.month_profit|money }}</div>
+                <div class="text-muted small">Expenses: {{ dashboard.month_expenses|money }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-start border-danger border-4 shadow-sm">
+            <div class="card-body">
+                <div class="text-muted small">Low Stock Items</div>
+                <div class="fs-4 fw-semibold {{ dashboard.low_stock_count > 0 ? 'text-danger' : '' }}">{{ dashboard.low_stock_count }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-start border-secondary border-4 shadow-sm">
+            <div class="card-body">
+                <div class="text-muted small">Month COGS</div>
+                <div class="fs-4 fw-semibold">{{ dashboard.cogs|money }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">Sales — last 14 days</div>
+            <div class="card-body">
+                <canvas id="salesChart" height="120"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">Sales by category — this month</div>
+            <div class="card-body">
+                <canvas id="categoryChart" height="120"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Recent orders</span>
+                <a href="{{ path('order_index') }}" class="btn btn-sm btn-outline-secondary">View all</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Customer</th>
+                            <th>Status</th>
+                            <th class="text-end">Total</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in recentOrders %}
+                            <tr>
+                                <td><a href="{{ path('order_show', {'id': order.id}) }}">{{ order.orderNo }}</a></td>
+                                <td>{{ order.customer ?? '—' }}</td>
+                                <td>
+                                    {% if order.status == 'paid' %}<span class="badge bg-success">Paid</span>
+                                    {% elseif order.status == 'open' %}<span class="badge bg-warning text-dark">Open</span>
+                                    {% elseif order.status == 'cancelled' %}<span class="badge bg-secondary">Cancelled</span>
+                                    {% elseif order.status == 'refunded' %}<span class="badge bg-danger">Refunded</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">{{ order.total|money }}</td>
+                                <td>{{ order.createdAt|date('Y-m-d H:i') }}</td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="5" class="text-center text-muted py-4">No orders yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Low stock</span>
+                <a href="{{ path('product_index') }}" class="btn btn-sm btn-outline-secondary">Products</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th class="text-end">Stock</th>
+                            <th class="text-end">Threshold</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in lowStock %}
+                            <tr>
+                                <td>{{ product.name }}</td>
+                                <td class="text-end text-danger fw-semibold">{{ product.currentStock }}</td>
+                                <td class="text-end">{{ product.lowStockThreshold }}</td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="3" class="text-center text-muted py-4">All stocked up.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+    const salesLabels = {{ salesByDay|map(d => d.date)|json_encode|raw }};
+    const salesData = {{ salesByDay|map(d => d.total)|json_encode|raw }};
+
+    new Chart(document.getElementById('salesChart'), {
+        type: 'line',
+        data: {
+            labels: salesLabels,
+            datasets: [{
+                label: 'Sales',
+                data: salesData,
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
+    const catLabels = {{ salesByCategory|map(c => c.category)|json_encode|raw }};
+    const catData = {{ salesByCategory|map(c => c.total)|json_encode|raw }};
+
+    new Chart(document.getElementById('categoryChart'), {
+        type: 'doughnut',
+        data: {
+            labels: catLabels,
+            datasets: [{
+                data: catData,
+                backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#0dcaf0', '#6f42c1', '#fd7e14']
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit {{ employee.name }}{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Edit {{ employee.name }}</h1>
+    <a href="{{ path('employee_index') }}" class="btn btn-outline-secondary">Back</a>
+</div>
+
+<form method="post" action="{{ path('employee_edit', {'id': employee.id}) }}">
+    {% include 'staff/employee/_form.html.twig' %}
+    <button type="submit" class="btn btn-primary">Save changes</button>
+</form>
+{% endblock %}

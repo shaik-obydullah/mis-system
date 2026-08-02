@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Audit Log{% endblock %}
+
+{% block body %}
+<h1 class="h3 mb-4">Audit Log</h1>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Entity</th>
+                    <th>ID</th>
+                    <th>Changes</th>
+                    <th>IP</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                    <tr>
+                        <td>{{ log.createdAt|date('Y-m-d H:i:s') }}</td>
+                        <td>{{ log.user ? log.user.email : '—' }}</td>
+                        <td><span class="badge bg-light text-dark border">{{ log.action }}</span></td>
+                        <td>{{ log.entity }}</td>
+                        <td>{{ log.entityId ?? '—' }}</td>
+                        <td>
+                            {% if log.changes|length > 0 %}
+                                <code class="small">{{ log.changes|json_encode }}</code>
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>{{ log.ip ?? '—' }}</td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="7" class="text-center text-muted py-4">No audit entries yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

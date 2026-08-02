@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Purchase PUR-{{ purchase.id }}{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Purchase PUR-{{ purchase.id }}</h1>
+    <a href="{{ path('purchase_index') }}" class="btn btn-outline-secondary">Back</a>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header">Items</div>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th class="text-end">Qty</th>
+                            <th class="text-end">Unit cost</th>
+                            <th class="text-end">Line total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in purchase.items %}
+                            <tr>
+                                <td>{{ item.product.name }} <small class="text-muted">({{ item.product.sku }})</small></td>
+                                <td class="text-end">{{ item.quantity }}</td>
+                                <td class="text-end">{{ item.unitCost|money }}</td>
+                                <td class="text-end">{{ item.lineTotal|money }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr class="fw-bold">
+                            <td colspan="3" class="text-end">Total</td>
+                            <td class="text-end">{{ purchase.total|money }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-header">Details</div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between">
+                    <span class="text-muted">Supplier</span>
+                    <span>{{ purchase.supplier ? purchase.supplier.name : '—' }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span class="text-muted">Note</span>
+                    <span>{{ purchase.note ?? '—' }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span class="text-muted">Created by</span>
+                    <span>{{ purchase.createdBy.fullName }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span class="text-muted">Date</span>
+                    <span>{{ purchase.createdAt|date('Y-m-d H:i') }}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

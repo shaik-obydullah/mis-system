@@ -1,0 +1,100 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Order{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">New Order</h1>
+    <a href="{{ path('order_index') }}" class="btn btn-outline-secondary">Back to orders</a>
+</div>
+
+<form method="post" action="{{ path('order_new') }}">
+    <div class="card shadow-sm mb-3">
+        <div class="card-header">Order details</div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="customer" class="form-label">Customer</label>
+                    <input type="text" id="customer" name="customer" class="form-control" placeholder="Walk-in customer">
+                </div>
+                <div class="col-md-6">
+                    <label for="payment_method" class="form-label">Payment method</label>
+                    <select id="payment_method" name="payment_method" class="form-select">
+                        <option value="">Leave open</option>
+                        <option value="cash" selected>Cash</option>
+                        <option value="card">Card</option>
+                        <option value="online">Online</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Items</span>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="addLine"><i class="bi bi-plus-lg me-1"></i>Add item</button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th style="width: 160px;">Quantity</th>
+                            <th style="width: 60px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="lines">
+                        <tr class="line-row">
+                            <td>
+                                <select name="product_id[]" class="form-select product-select">
+                                    {% for p in products %}
+                                        <option value="{{ p.id }}">{{ p.name }} ({{ p.sku }}) — stock: {{ p.currentStock }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td><input type="number" name="quantity[]" class="form-control quantity-input" value="1" min="0.001" step="0.001" required></td>
+                            <td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger remove-line"><i class="bi bi-trash"></i></button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create order</button>
+</form>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    const addLineBtn = document.getElementById('addLine');
+    const lines = document.getElementById('lines');
+
+    addLineBtn.addEventListener('click', () => {
+        const row = document.createElement('tr');
+        row.className = 'line-row';
+        row.innerHTML = `
+            <td>
+                <select name="product_id[]" class="form-select product-select">
+                    {% for p in products %}
+                        <option value="{{ p.id }}">{{ p.name }} ({{ p.sku }}) — stock: {{ p.currentStock }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td><input type="number" name="quantity[]" class="form-control quantity-input" value="1" min="0.001" step="0.001" required></td>
+            <td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger remove-line"><i class="bi bi-trash"></i></button></td>`;
+        lines.appendChild(row);
+    });
+
+    lines.addEventListener('click', (event) => {
+        if (event.target.closest('.remove-line')) {
+            const rows = document.querySelectorAll('.line-row');
+            if (rows.length > 1) {
+                event.target.closest('.line-row').remove();
+            }
+        }
+    });
+</script>
+{% endblock %}
