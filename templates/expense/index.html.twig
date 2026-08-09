@@ -2,8 +2,6 @@
 
 {% block title %}Expenses{% endblock %}
 
-{% block page_title %}Expenses{% endblock %}
-
 {% block body %}
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
     <div class="page-heading mb-0">
@@ -59,7 +57,7 @@
             <tbody>
                 {% for expense in expenses %}
                     <tr>
-                        <td>{{ expense.date|date('Y-m-d') }}</td>
+                        <td>{{ expense.date|date_fmt }}</td>
                         <td>{{ expense.category.name }}</td>
                         <td>{{ expense.description ?? '—' }}</td>
                         <td class="text-end fw-semibold">{{ expense.amount|money }}</td>

@@ -21,6 +21,8 @@ class ProductController extends AbstractController
     #[Route('', name: 'product_index', methods: ['GET'])]
     public function index(Request $request, ProductRepository $products, ProductCategoryRepository $categories, Paginator $paginator): Response
     {
+        $this->denyAccessUnlessGranted('product.view');
+
         $qb = $products->createQueryBuilder('p')->orderBy('p.name', 'ASC');
 
         $q = trim((string) $request->query->get('q', ''));
@@ -75,6 +77,8 @@ class ProductController extends AbstractController
         SupplierRepository $suppliers,
         AuditService $audit,
     ): Response {
+        $this->denyAccessUnlessGranted('product.manage');
+
         if ($request->isMethod('POST')) {
             try {
                 $product = new Product();
@@ -105,6 +109,8 @@ class ProductController extends AbstractController
         SupplierRepository $suppliers,
         AuditService $audit,
     ): Response {
+        $this->denyAccessUnlessGranted('product.manage');
+
         if ($request->isMethod('POST')) {
             try {
                 $this->applyRequest($request, $product, $em);
@@ -128,6 +134,8 @@ class ProductController extends AbstractController
     #[Route('/{id}/delete', name: 'product_delete', methods: ['POST'])]
     public function delete(Request $request, Product $product, EntityManagerInterface $em, AuditService $audit): Response
     {
+        $this->denyAccessUnlessGranted('product.manage');
+
         if (!$this->isCsrfTokenValid('delete_product_' . $product->getId(), (string) $request->request->get('_token'))) {
             $this->addFlash('danger', 'Invalid CSRF token.');
 

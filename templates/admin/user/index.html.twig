@@ -15,7 +15,9 @@
                 <tr>
                     <th>Name</th>
                     <th>Email</th>
-                    <th>Role</th>
+                    <th>Primary role</th>
+                    <th>Roles</th>
+                    <th>Permissions</th>
                     <th>Status</th>
                     <th>Created</th>
                     <th class="text-end">Actions</th>
@@ -32,10 +34,23 @@
                             {% else %}<span class="badge bg-secondary">Staff</span>{% endif %}
                         </td>
                         <td>
+                            {% for role in user.roleEntities %}
+                                <span class="badge bg-primary-subtle text-primary border">{{ role.label }}</span>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {% set directPermissions = user.permissions|length %}
+                            <span class="badge {% if directPermissions > 0 %}bg-success-subtle text-success border{% else %}bg-light text-muted border{% endif %}">
+                                {{ directPermissions }} direct
+                            </span>
+                        </td>
+                        <td>
                             {% if user.active %}<span class="badge bg-success">Active</span>
                             {% else %}<span class="badge bg-secondary">Disabled</span>{% endif %}
                         </td>
-                        <td>{{ user.createdAt|date('Y-m-d') }}</td>
+                        <td>{{ user.createdAt|date_fmt }}</td>
                         <td class="text-end">
                             <a href="{{ path('admin_user_edit', {'id': user.id}) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
                             {% if user != app.user %}
@@ -47,7 +62,7 @@
                         </td>
                     </tr>
                 {% else %}
-                    <tr><td colspan="6" class="text-center text-muted py-4">No users yet.</td></tr>
+                    <tr><td colspan="8" class="text-center text-muted py-4">No users yet.</td></tr>
                 {% endfor %}
             </tbody>
         </table>

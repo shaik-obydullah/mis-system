@@ -60,6 +60,8 @@ class OrderController extends AbstractController
     #[Route('', name: 'order_index', methods: ['GET'])]
     public function index(Request $request, OrderRepository $orders, Paginator $paginator): Response
     {
+        $this->denyAccessUnlessGranted('order.view');
+
         $qb = $this->filterQuery($request, $orders);
         $pagination = $paginator->paginate($qb, (int) $request->query->get('page', 1), 25);
 
@@ -73,6 +75,8 @@ class OrderController extends AbstractController
     #[Route('/export.csv', name: 'order_export', methods: ['GET'])]
     public function export(Request $request, OrderRepository $orders, CsvService $csv): Response
     {
+        $this->denyAccessUnlessGranted('order.export');
+
         $qb = $this->filterQuery($request, $orders);
 
         $rows = [];
@@ -100,6 +104,8 @@ class OrderController extends AbstractController
         SettingsService $settings,
         AuditService $audit,
     ): Response {
+        $this->denyAccessUnlessGranted('order.create');
+
         if ($request->isMethod('POST')) {
             $productIds = $request->request->all('product_id');
             $quantities = $request->request->all('quantity');
@@ -146,12 +152,16 @@ class OrderController extends AbstractController
     #[Route('/{id}', name: 'order_show', methods: ['GET'])]
     public function show(Order $order): Response
     {
+        $this->denyAccessUnlessGranted('order.view');
+
         return $this->render('order/show.html.twig', ['order' => $order]);
     }
 
     #[Route('/{id}/pay', name: 'order_pay', methods: ['POST'])]
     public function pay(Request $request, Order $order, OrderService $orderService, AuditService $audit): Response
     {
+        $this->denyAccessUnlessGranted('order.pay');
+
         if (!$this->isCsrfTokenValid('order_pay_' . $order->getId(), (string) $request->request->get('_token'))) {
             $this->addFlash('danger', 'Invalid CSRF token.');
 
@@ -178,6 +188,8 @@ class OrderController extends AbstractController
     #[Route('/{id}/cancel', name: 'order_cancel', methods: ['POST'])]
     public function cancel(Request $request, Order $order, OrderService $orderService, AuditService $audit): Response
     {
+        $this->denyAccessUnlessGranted('order.cancel');
+
         if (!$this->isCsrfTokenValid('order_cancel_' . $order->getId(), (string) $request->request->get('_token'))) {
             $this->addFlash('danger', 'Invalid CSRF token.');
 
@@ -194,6 +206,8 @@ class OrderController extends AbstractController
     #[Route('/{id}/refund', name: 'order_refund', methods: ['POST'])]
     public function refund(Request $request, Order $order, OrderService $orderService, AuditService $audit): Response
     {
+        $this->denyAccessUnlessGranted('order.refund');
+
         if (!$this->isCsrfTokenValid('order_refund_' . $order->getId(), (string) $request->request->get('_token'))) {
             $this->addFlash('danger', 'Invalid CSRF token.');
 

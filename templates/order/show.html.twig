@@ -94,11 +94,11 @@
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
                     <span class="text-muted">Created</span>
-                    <span>{{ order.createdAt|date('Y-m-d H:i') }}</span>
+                    <span>{{ order.createdAt|datetime_fmt }}</span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
                     <span class="text-muted">Paid at</span>
-                    <span>{{ order.paidAt ? order.paidAt|date('Y-m-d H:i') : '—' }}</span>
+                    <span>{{ order.paidAt ? order.paidAt|datetime_fmt : '—' }}</span>
                 </li>
             </ul>
         </div>

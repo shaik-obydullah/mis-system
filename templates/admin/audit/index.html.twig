@@ -22,14 +22,21 @@
             <tbody>
                 {% for log in logs %}
                     <tr>
-                        <td>{{ log.createdAt|date('Y-m-d H:i:s') }}</td>
+                        <td>{{ log.createdAt|datetime_fmt }}</td>
                         <td>{{ log.user ? log.user.email : '—' }}</td>
                         <td><span class="badge bg-light text-dark border">{{ log.action }}</span></td>
                         <td>{{ log.entity }}</td>
                         <td>{{ log.entityId ?? '—' }}</td>
-                        <td>
+                        <td style="min-width: 220px;">
                             {% if log.changes|length > 0 %}
-                                <code class="small">{{ log.changes|json_encode }}</code>
+                                <div class="d-flex flex-column gap-1">
+                                    {% for key, value in log.changes %}
+                                        <div class="d-flex gap-2">
+                                            <span class="text-muted small text-nowrap" style="width: 110px;">{{ key|replace({'_': ' '})|capitalize }}:</span>
+                                            <code class="small">{{ value is iterable ? value|join(', ') : value }}</code>
+                                        </div>
+                                    {% endfor %}
+                                </div>
                             {% else %}
                                 —
                             {% endif %}

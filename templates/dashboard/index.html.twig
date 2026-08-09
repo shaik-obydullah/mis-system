@@ -2,8 +2,6 @@
 
 {% block title %}Dashboard{% endblock %}
 
-{% block page_title %}Dashboard{% endblock %}
-
 {% block body %}
 <div class="row g-4 mb-4">
     <div class="col-6 col-md-4 col-xxl-2">
@@ -118,7 +116,7 @@
                                     {% endif %}
                                 </td>
                                 <td class="text-end fw-semibold">{{ order.total|money }}</td>
-                                <td>{{ order.createdAt|date('Y-m-d H:i') }}</td>
+                                <td>{{ order.createdAt|datetime_fmt }}</td>
                             </tr>
                         {% else %}
                             <tr><td colspan="5" class="text-center text-muted py-4">No orders yet.</td></tr>

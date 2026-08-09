@@ -36,6 +36,8 @@ class ReportController extends AbstractController
         ExpenseRepository $expenses,
         OrderItemRepository $orderItems,
     ): Response {
+        $this->denyAccessUnlessGranted('report.view');
+
         [$from, $to, $fromDate, $toExclusive] = $this->dateRange($request);
 
         return $this->render('report/index.html.twig', [
@@ -59,6 +61,8 @@ class ReportController extends AbstractController
         OrderItemRepository $orderItems,
         CsvService $csv,
     ): Response {
+        $this->denyAccessUnlessGranted('report.export');
+
         [$from, $to, $fromDate, $toExclusive] = $this->dateRange($request);
 
         $report = $reportService->profitAndLoss($fromDate, $toExclusive);

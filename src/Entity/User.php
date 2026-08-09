@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -33,9 +35,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
+    #[ORM\ManyToMany(targetEntity: Role::class, inversedBy: 'users')]
+    #[ORM\JoinTable(name: 'user_role')]
+    private Collection $roles;
+
+    #[ORM\ManyToMany(targetEntity: Permission::class)]
+    #[ORM\JoinTable(name: 'user_permission')]
+    private Collection $permissions;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
+        $this->roles = new ArrayCollection();
+        $this->permissions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -110,7 +122,104 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getRoles(): array
     {
-        return [$this->role];
+        $roles = [];
+        foreach ($this->roles as $role) {
+            $roles[] = $role->getName();
+        }
+
+        $roles[] = $this->role;
+        $roles[] = 'ROLE_USER';
+
+        return array_values(array_unique(array_filter($roles)));
+    }
+
+    /** @return Collection<int, Role> */
+    public function getRoleEntities(): Collection
+    {
+        return $this->roles;
+    }
+
+    public function addRole(Role $role): static
+    {
+        if (!$this->roles->contains($role)) {
+            $this->roles->add($role);
+        }
+
+        return $this;
+    }
+
+    public function removeRole(Role $role): static
+    {
+        $this->roles->removeElement($role);
+
+        return $this;
+    }
+
+    public function hasRole(string $roleName): bool
+    {
+        foreach ($this->roles as $role) {
+            if ($role->getName() === $roleName) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** @return Collection<int, Permission> */
+    public function getPermissions(): Collection
+    {
+        return $this->permissions;
+    }
+
+    public function addPermission(Permission $permission): static
+    {
+        if (!$this->permissions->contains($permission)) {
+            $this->permissions->add($permission);
+        }
+
+        return $this;
+    }
+
+    public function removePermission(Permission $permission): static
+    {
+        $this->permissions->removeElement($permission);
+
+        return $this;
+    }
+
+    public function hasPermission(Permission $permission): bool
+    {
+        if ($this->permissions->contains($permission)) {
+            return true;
+        }
+
+        foreach ($this->roles as $role) {
+            if ($role->hasPermission($permission)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function hasPermissionByName(string $permissionName): bool
+    {
+        foreach ($this->permissions as $permission) {
+            if ($permission->getName() === $permissionName) {
+                return true;
+            }
+        }
+
+        foreach ($this->roles as $role) {
+            foreach ($role->getPermissions() as $permission) {
+                if ($permission->getName() === $permissionName) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public function eraseCredentials(): void

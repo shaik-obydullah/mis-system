@@ -37,10 +37,10 @@
 
                     {% if is_granted('ROLE_MANAGER') %}
                         <li class="nav-section">Inventory</li>
-                        <li><a href="{{ path('product_index') }}" class="nav-link {% if app.request.attributes.get('_route') starts with 'product_' %}active{% endif %}">
+                        <li><a href="{{ path('product_index') }}" class="nav-link {% if app.request.attributes.get('_route') starts with 'product_' and not app.request.attributes.get('_route') starts with 'product_category_' %}active{% endif %}">
                             <i class="bi bi-box-seam"></i><span>Products</span></a>
                         </li>
-                        <li><a href="{{ path('product_category_index') }}" class="nav-link {% if app.request.attributes.get('_route') == 'product_category_index' %}active{% endif %}">
+                        <li><a href="{{ path('product_category_index') }}" class="nav-link {% if app.request.attributes.get('_route') starts with 'product_category_' %}active{% endif %}">
                             <i class="bi bi-tags"></i><span>Categories</span></a>
                         </li>
                         <li><a href="{{ path('supplier_index') }}" class="nav-link {% if app.request.attributes.get('_route') starts with 'supplier_' %}active{% endif %}">
@@ -85,6 +85,12 @@
                         </li>
                         <li><a href="{{ path('admin_audit') }}" class="nav-link {% if app.request.attributes.get('_route') == 'admin_audit' %}active{% endif %}">
                             <i class="bi bi-journal-text"></i><span>Audit Log</span></a>
+                        </li>
+                        <li><a href="{{ path('admin_roles') }}" class="nav-link {% if app.request.attributes.get('_route') starts with 'admin_role' %}active{% endif %}">
+                            <i class="bi bi-shield-lock"></i><span>Roles</span></a>
+                        </li>
+                        <li><a href="{{ path('admin_permissions') }}" class="nav-link {% if app.request.attributes.get('_route') starts with 'admin_permission' %}active{% endif %}">
+                            <i class="bi bi-key"></i><span>Permissions</span></a>
                         </li>
                     {% endif %}
                 </ul>
@@ -144,7 +150,7 @@
                         </div>
                     {% endfor %}
                 {% endfor %}
-                {{ block('body') }}
+                {% block body %}{% endblock %}
             </main>
         </div>
     </div>
@@ -170,7 +176,6 @@
 {% else %}
     {{ block('body') }}
 {% endif %}
-{% block body %}{% endblock %}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 {% block javascripts %}{% endblock %}
 </body>

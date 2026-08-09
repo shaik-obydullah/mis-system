@@ -23,7 +23,7 @@
                 </span>
                 <div class="flex-grow-1">
                     <div>{{ notification.message }}</div>
-                    <small class="text-muted">{{ notification.createdAt|date('Y-m-d H:i') }}</small>
+                    <small class="text-muted">{{ notification.createdAt|datetime_fmt }}</small>
                 </div>
                 {% if not notification.isRead %}
                     <span class="badge bg-primary">New</span>

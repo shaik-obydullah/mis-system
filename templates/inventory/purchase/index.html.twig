@@ -30,7 +30,7 @@
                         <td class="text-end">{{ purchase.total|money }}</td>
                         <td>{{ purchase.note ?? '—' }}</td>
                         <td>{{ purchase.createdBy.fullName }}</td>
-                        <td>{{ purchase.createdAt|date('Y-m-d H:i') }}</td>
+                        <td>{{ purchase.createdAt|datetime_fmt }}</td>
                         <td class="text-end">
                             <a href="{{ path('purchase_show', {'id': purchase.id}) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i></a>
                         </td>

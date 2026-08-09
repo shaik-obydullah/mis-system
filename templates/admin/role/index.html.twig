@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Roles{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Roles</h1>
+    <a href="{{ path('admin_role_new') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>New role</a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Role</th>
+                    <th>Label</th>
+                    <th>Permissions</th>
+                    <th>Users</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for role in roles %}
+                    <tr>
+                        <td><code>{{ role.name }}</code></td>
+                        <td>{{ role.label }}</td>
+                        <td>
+                            <span class="badge bg-primary-subtle text-primary border">{{ role.permissions|length }}</span>
+                            <span class="text-muted small">
+                                {% for p in role.permissions|slice(0, 4) %}{{ p.name }}{% if not loop.last %}, {% endif %}{% endfor %}{% if role.permissions|length > 4 %}…{% endif %}
+                            </span>
+                        </td>
+                        <td><span class="badge bg-light text-dark border">{{ role.users|length }}</span></td>
+                        <td class="text-end">
+                            <a href="{{ path('admin_role_edit', {'id': role.id}) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+                            {% if role.name != 'ROLE_ADMIN' and role.users|length == 0 %}
+                                <form action="{{ path('admin_role_delete', {'id': role.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Delete role {{ role.name }}?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_role_' ~ role.id) }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="5" class="text-center text-muted py-4">No roles yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

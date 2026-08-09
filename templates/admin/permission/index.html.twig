@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Permissions{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Permissions</h1>
+    <a href="{{ path('admin_permission_new') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>New permission</a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Label</th>
+                    <th>Used by roles</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for permission in permissions %}
+                    <tr>
+                        <td><code>{{ permission.name }}</code></td>
+                        <td>{{ permission.label }}</td>
+                        <td>
+                            {% for role in permission.roles %}
+                                <span class="badge bg-primary-subtle text-primary border">{{ role.label }}</span>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endfor %}
+                        </td>
+                        <td class="text-end">
+                            {% if permission.roles|length == 0 %}
+                                <form action="{{ path('admin_permission_delete', {'id': permission.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Delete permission {{ permission.name }}?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_permission_' ~ permission.id) }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="4" class="text-center text-muted py-4">No permissions yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

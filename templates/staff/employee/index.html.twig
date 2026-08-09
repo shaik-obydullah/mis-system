@@ -29,7 +29,7 @@
                         <td>{{ employee.role|capitalize }}</td>
                         <td>{{ employee.phone ?? '—' }}</td>
                         <td class="text-end">{{ employee.baseSalary|money }}</td>
-                        <td>{{ employee.hireDate|date('Y-m-d') }}</td>
+                        <td>{{ employee.hireDate|date_fmt }}</td>
                         <td>
                             {% if employee.active %}<span class="badge bg-success">Active</span>
                             {% else %}<span class="badge bg-secondary">Inactive</span>{% endif %}

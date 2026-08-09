@@ -43,6 +43,7 @@
                             <th>Product</th>
                             <th style="width: 140px;">Quantity</th>
                             <th style="width: 140px;">Unit cost</th>
+                            <th style="width: 160px;" class="text-end">Line total</th>
                             <th style="width: 60px;"></th>
                         </tr>
                     </thead>
@@ -56,8 +57,9 @@
                                     {% endfor %}
                                 </select>
                             </td>
-                            <td><input type="number" name="quantity[]" class="form-control" value="1" min="0.001" step="0.001" required></td>
-                            <td><input type="number" name="unit_cost[]" class="form-control" value="0.00" min="0.01" step="0.01" required></td>
+                            <td><input type="number" name="quantity[]" class="form-control quantity-input" value="1" min="0.001" step="0.001" required></td>
+                            <td><input type="number" name="unit_cost[]" class="form-control cost-input" value="0.00" min="0.01" step="0.01" required></td>
+                            <td class="text-end line-total fw-semibold">0.00</td>
                             <td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger remove-line"><i class="bi bi-trash"></i></button></td>
                         </tr>
                     </tbody>
@@ -66,14 +68,55 @@
         </div>
     </div>
 
-    <button type="submit" class="btn btn-primary">Record purchase</button>
+    <div class="row justify-content-end">
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <table class="table table-borderless mb-0">
+                        <tbody>
+                            <tr>
+                                <td class="text-muted">Subtotal</td>
+                                <td class="text-end fw-semibold" id="summarySubtotal">{{ settings.get('currency', 'USD') }} 0.00</td>
+                            </tr>
+                            <tr class="border-top">
+                                <td class="fw-bold">Total</td>
+                                <td class="text-end fs-5 fw-bold" id="summaryTotal">{{ settings.get('currency', 'USD') }} 0.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <button type="submit" class="btn btn-primary">Record purchase</button>
+    </div>
 </form>
 {% endblock %}
 
 {% block javascripts %}
 <script>
+    const currency = '{{ settings.get('currency', 'USD') }}';
     const addLineBtn = document.getElementById('addLine');
     const lines = document.getElementById('lines');
+
+    function fmt(value) {
+        return currency + ' ' + value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function recalc() {
+        let subtotal = 0;
+        document.querySelectorAll('.line-row').forEach(row => {
+            const qty = parseFloat(row.querySelector('.quantity-input').value) || 0;
+            const cost = parseFloat(row.querySelector('.cost-input').value) || 0;
+            const total = qty * cost;
+            row.querySelector('.line-total').textContent = fmt(total);
+            subtotal += total;
+        });
+        document.getElementById('summarySubtotal').textContent = fmt(subtotal);
+        document.getElementById('summaryTotal').textContent = fmt(subtotal);
+    }
 
     addLineBtn.addEventListener('click', () => {
         const row = document.createElement('tr');
@@ -87,10 +130,12 @@
                     {% endfor %}
                 </select>
             </td>
-            <td><input type="number" name="quantity[]" class="form-control" value="1" min="0.001" step="0.001" required></td>
-            <td><input type="number" name="unit_cost[]" class="form-control" value="0.00" min="0.01" step="0.01" required></td>
+            <td><input type="number" name="quantity[]" class="form-control quantity-input" value="1" min="0.001" step="0.001" required></td>
+            <td><input type="number" name="unit_cost[]" class="form-control cost-input" value="0.00" min="0.01" step="0.01" required></td>
+            <td class="text-end line-total fw-semibold">0.00</td>
             <td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger remove-line"><i class="bi bi-trash"></i></button></td>`;
         lines.appendChild(row);
+        recalc();
     });
 
     lines.addEventListener('click', (event) => {
@@ -98,7 +143,14 @@
             const rows = document.querySelectorAll('.line-row');
             if (rows.length > 1) {
                 event.target.closest('.line-row').remove();
+                recalc();
             }
+        }
+    });
+
+    lines.addEventListener('input', (event) => {
+        if (event.target.matches('.quantity-input, .cost-input')) {
+            recalc();
         }
     });
 </script>

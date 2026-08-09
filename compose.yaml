@@ -12,7 +12,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    restart: unless-stopped
+    restart: no
 
   nginx:
     image: nginx:alpine
@@ -24,7 +24,7 @@ services:
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - php
-    restart: unless-stopped
+    restart: no
 
   db:
     image: mysql:8.0
@@ -43,7 +43,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 20
-    restart: unless-stopped
+    restart: no
 
   phpmyadmin:
     image: phpmyadmin:latest
@@ -56,7 +56,7 @@ services:
       UPLOAD_LIMIT: 100M
     depends_on:
       - db
-    restart: unless-stopped
+    restart: no
 
   mailer:
     image: axllent/mailpit
@@ -67,7 +67,7 @@ services:
     environment:
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
-    restart: unless-stopped
+    restart: no
 
 volumes:
   db_data:

@@ -7,8 +7,10 @@ use App\Entity\Employee;
 use App\Entity\Expense;
 use App\Entity\ExpenseCategory;
 use App\Entity\Order;
+use App\Entity\Permission;
 use App\Entity\Product;
 use App\Entity\ProductCategory;
+use App\Entity\Role;
 use App\Entity\SalaryRecord;
 use App\Entity\Supplier;
 use App\Entity\User;
@@ -43,10 +45,14 @@ class SeedCommand extends Command
         $manager = $this->user('manager@mis.test', 'manager123', 'Maria Lopez', 'ROLE_MANAGER');
         $staff = $this->user('staff@mis.test', 'staff123', 'John Carter', 'ROLE_STAFF');
 
+        $this->seedRolesAndPermissions($admin, $manager, $staff);
+
         $this->settings->set('business_name', 'Golden Fork Restaurant');
         $this->settings->set('currency', 'USD');
         $this->settings->set('timezone', 'UTC');
         $this->settings->set('tax_rate', '5');
+        $this->settings->set('date_format', 'Y-m-d');
+        $this->settings->set('time_format', 'H:i');
 
         $food = $this->category('Food');
         $beverages = $this->category('Beverages');
@@ -130,6 +136,83 @@ class SeedCommand extends Command
         $this->em->persist($user);
 
         return $user;
+    }
+
+    private function seedRolesAndPermissions(User $admin, User $manager, User $staff): void
+    {
+        $permissions = [
+            'dashboard.view' => 'View dashboard',
+            'order.view' => 'View orders',
+            'order.create' => 'Create orders',
+            'order.pay' => 'Record payments',
+            'order.cancel' => 'Cancel orders',
+            'order.refund' => 'Refund orders',
+            'order.export' => 'Export orders',
+            'product.view' => 'View products',
+            'product.manage' => 'Manage products',
+            'category.manage' => 'Manage product categories',
+            'supplier.manage' => 'Manage suppliers',
+            'purchase.manage' => 'Manage purchases',
+            'expense.view' => 'View expenses',
+            'expense.manage' => 'Manage expenses',
+            'expense_category.manage' => 'Manage expense categories',
+            'staff.manage' => 'Manage staff (employees, attendance, salaries)',
+            'report.view' => 'View reports',
+            'report.export' => 'Export reports',
+            'user.manage' => 'Manage users',
+            'role.manage' => 'Manage roles',
+            'permission.manage' => 'Manage permissions',
+            'setting.manage' => 'Manage settings',
+            'audit.view' => 'View audit log',
+            'notification.view' => 'View notifications',
+        ];
+
+        $entities = [];
+        foreach ($permissions as $name => $label) {
+            $permission = $this->em->getRepository(Permission::class)->findByName($name);
+            if (!$permission) {
+                $permission = (new Permission())->setName($name)->setLabel($label);
+                $this->em->persist($permission);
+            }
+            $entities[$name] = $permission;
+        }
+        $this->em->flush();
+
+        $this->role('ROLE_ADMIN', 'Administrator', array_keys($permissions), $entities);
+        $this->role('ROLE_MANAGER', 'Manager', [
+            'dashboard.view',
+            'order.view', 'order.create', 'order.pay', 'order.cancel', 'order.refund', 'order.export',
+            'product.view', 'product.manage', 'category.manage', 'supplier.manage', 'purchase.manage',
+            'expense.view', 'expense.manage', 'expense_category.manage',
+            'staff.manage', 'report.view', 'report.export', 'notification.view',
+        ], $entities);
+        $this->role('ROLE_STAFF', 'Staff', [
+            'dashboard.view',
+            'order.view', 'order.create', 'order.pay', 'order.cancel',
+            'product.view', 'expense.view', 'notification.view',
+        ], $entities);
+
+        $this->em->flush();
+
+        $admin->addRole($this->em->getRepository(Role::class)->findByName('ROLE_ADMIN'));
+        $manager->addRole($this->em->getRepository(Role::class)->findByName('ROLE_MANAGER'));
+        $staff->addRole($this->em->getRepository(Role::class)->findByName('ROLE_STAFF'));
+        $this->em->flush();
+    }
+
+    private function role(string $name, string $label, array $permissionNames, array $entities): void
+    {
+        $role = $this->em->getRepository(Role::class)->findByName($name);
+        if (!$role) {
+            $role = (new Role())->setName($name)->setLabel($label);
+            $this->em->persist($role);
+        }
+
+        foreach ($permissionNames as $permissionName) {
+            if (isset($entities[$permissionName])) {
+                $role->addPermission($entities[$permissionName]);
+            }
+        }
     }
 
     private function category(string $name): ProductCategory

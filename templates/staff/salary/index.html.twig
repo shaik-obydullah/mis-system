@@ -26,7 +26,7 @@
                         <td>{{ salary.employee.name }}</td>
                         <td>{{ salary.period }}</td>
                         <td class="text-end">{{ salary.amount|money }}</td>
-                        <td>{{ salary.paidAt ? salary.paidAt|date('Y-m-d') : '—' }}</td>
+                        <td>{{ salary.paidAt ? salary.paidAt|date_fmt : '—' }}</td>
                         <td>{{ salary.createdBy.fullName }}</td>
                     </tr>
                 {% else %}

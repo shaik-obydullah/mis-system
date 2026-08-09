@@ -32,7 +32,7 @@
     </table>
 
     <div class="meta">
-        <strong>Date:</strong> {{ order.createdAt|date('Y-m-d H:i') }}<br>
+        <strong>Date:</strong> {{ order.createdAt|datetime_fmt }}<br>
         <strong>Customer:</strong> {{ order.customer ?? 'Walk-in customer' }}<br>
         <strong>Cashier:</strong> {{ order.createdBy.fullName }}<br>
         <strong>Status:</strong> {{ order.status|capitalize }}
@@ -74,6 +74,6 @@
         </tr>
     </table>
 
-    <div class="footer">Thank you for your business. Generated {{ 'now'|date('Y-m-d H:i') }}.</div>
+    <div class="footer">Thank you for your business. Generated {{ 'now'|datetime_fmt }}.</div>
 </body>
 </html>

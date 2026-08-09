@@ -13,6 +13,8 @@ class AuditController extends AbstractController
     #[Route('', name: 'admin_audit', methods: ['GET'])]
     public function index(AuditLogRepository $logs): Response
     {
+        $this->denyAccessUnlessGranted('audit.view');
+
         return $this->render('admin/audit/index.html.twig', [
             'logs' => $logs->findBy([], ['createdAt' => 'DESC'], 200),
         ]);

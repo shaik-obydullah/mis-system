@@ -61,7 +61,7 @@
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
                     <span class="text-muted">Date</span>
-                    <span>{{ purchase.createdAt|date('Y-m-d H:i') }}</span>
+                    <span>{{ purchase.createdAt|datetime_fmt }}</span>
                 </li>
             </ul>
         </div>
