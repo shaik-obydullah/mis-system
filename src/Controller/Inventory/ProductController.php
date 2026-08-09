@@ -7,6 +7,8 @@ use App\Repository\ProductCategoryRepository;
 use App\Repository\ProductRepository;
 use App\Repository\SupplierRepository;
 use App\Service\AuditService;
+use App\Service\CsvService;
+use App\Service\Paginator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,12 +19,53 @@ use Symfony\Component\Routing\Attribute\Route;
 class ProductController extends AbstractController
 {
     #[Route('', name: 'product_index', methods: ['GET'])]
-    public function index(ProductRepository $products): Response
+    public function index(Request $request, ProductRepository $products, ProductCategoryRepository $categories, Paginator $paginator): Response
     {
+        $qb = $products->createQueryBuilder('p')->orderBy('p.name', 'ASC');
+
+        $q = trim((string) $request->query->get('q', ''));
+        if ($q !== '') {
+            $qb->andWhere('LOWER(p.name) LIKE :q OR LOWER(p.sku) LIKE :q')
+                ->setParameter('q', '%' . mb_strtolower($q) . '%');
+        }
+
+        $category = (int) $request->query->get('category', 0);
+        if ($category > 0) {
+            $qb->andWhere('p.category = :category')->setParameter('category', $category);
+        }
+
+        $pagination = $paginator->paginate($qb, (int) $request->query->get('page', 1), 25);
+
         return $this->render('inventory/product/index.html.twig', [
-            'products' => $products->findBy([], ['name' => 'ASC']),
+            'products' => $pagination['items'],
+            'pagination' => $pagination,
+            'q' => $q,
+            'categoryFilter' => $category,
+            'categories' => $categories->findAll(),
         ]);
     }
+
+    #[Route('/export.csv', name: 'product_export', methods: ['GET'])]
+    public function export(Request $request, ProductRepository $products, CsvService $csv): Response
+    {
+        $rows = [];
+        foreach ($products->findBy([], ['name' => 'ASC']) as $product) {
+            $rows[] = [
+                $product->getName(),
+                $product->getSku(),
+                $product->getCategory()?->getName() ?? '',
+                $product->getSupplier()?->getName() ?? '',
+                $product->getPrice(),
+                $product->getCost(),
+                $product->getCurrentStock(),
+                $product->getLowStockThreshold(),
+                $product->isActive() ? 'active' : 'inactive',
+            ];
+        }
+
+        return $csv->export('products.csv', ['Name', 'SKU', 'Category', 'Supplier', 'Price', 'Cost', 'Stock', 'Threshold', 'Status'], $rows);
+    }
+
 
     #[Route('/new', name: 'product_new', methods: ['GET', 'POST'])]
     public function new(

@@ -70,6 +70,30 @@ class ReportService
     }
 
     /**
+     * @return array<int, array{name: string, sku: string, stock: float, cost: string, value: float}>
+     */
+    public function inventoryValuation(): array
+    {
+        $products = $this->em->getRepository(Product::class)->findAll();
+        $rows = [];
+
+        foreach ($products as $product) {
+            $stock = (float) $product->getCurrentStock();
+            $rows[] = [
+                'name' => (string) $product->getName(),
+                'sku' => (string) $product->getSku(),
+                'stock' => $stock,
+                'cost' => $product->getCost(),
+                'value' => round($stock * (float) $product->getCost(), 2),
+            ];
+        }
+
+        usort($rows, static fn (array $a, array $b): int => $b['value'] <=> $a['value']);
+
+        return $rows;
+    }
+
+    /**
      * @return array<string, string|int|array>
      */
     public function profitAndLoss(\DateTimeImmutable $from, \DateTimeImmutable $to): array

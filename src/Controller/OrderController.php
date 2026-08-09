@@ -6,8 +6,10 @@ use App\Entity\Order;
 use App\Repository\OrderRepository;
 use App\Repository\ProductRepository;
 use App\Service\AuditService;
+use App\Service\CsvService;
 use App\Service\InvoiceService;
 use App\Service\OrderService;
+use App\Service\Paginator;
 use App\Service\SettingsService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,12 +20,15 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/orders')]
 class OrderController extends AbstractController
 {
-    #[Route('', name: 'order_index', methods: ['GET'])]
-    public function index(Request $request, OrderRepository $orders): Response
+    private function filterQuery(Request $request, OrderRepository $orders): \Doctrine\ORM\QueryBuilder
     {
-        $qb = $orders->createQueryBuilder('o')
-            ->orderBy('o.createdAt', 'DESC')
-            ->setMaxResults(200);
+        $qb = $orders->createQueryBuilder('o')->orderBy('o.createdAt', 'DESC');
+
+        $q = trim((string) $request->query->get('q', ''));
+        if ($q !== '') {
+            $qb->andWhere('LOWER(o.orderNo) LIKE :q OR LOWER(COALESCE(o.customer, \'\')) LIKE :q')
+                ->setParameter('q', '%' . mb_strtolower($q) . '%');
+        }
 
         $from = $request->query->get('from');
         $to = $request->query->get('to');
@@ -39,10 +44,52 @@ class OrderController extends AbstractController
             $qb->andWhere('o.status = :status')->setParameter('status', $status);
         }
 
+        return $qb;
+    }
+
+    private function filters(Request $request): array
+    {
+        return [
+            'q' => (string) $request->query->get('q', ''),
+            'from' => $request->query->get('from'),
+            'to' => $request->query->get('to'),
+            'status' => $request->query->get('status'),
+        ];
+    }
+
+    #[Route('', name: 'order_index', methods: ['GET'])]
+    public function index(Request $request, OrderRepository $orders, Paginator $paginator): Response
+    {
+        $qb = $this->filterQuery($request, $orders);
+        $pagination = $paginator->paginate($qb, (int) $request->query->get('page', 1), 25);
+
         return $this->render('order/index.html.twig', [
-            'orders' => $qb->getQuery()->getResult(),
-            'filters' => ['from' => $from, 'to' => $to, 'status' => $status],
+            'orders' => $pagination['items'],
+            'pagination' => $pagination,
+            'filters' => $this->filters($request),
         ]);
+    }
+
+    #[Route('/export.csv', name: 'order_export', methods: ['GET'])]
+    public function export(Request $request, OrderRepository $orders, CsvService $csv): Response
+    {
+        $qb = $this->filterQuery($request, $orders);
+
+        $rows = [];
+        foreach ($qb->getQuery()->getResult() as $order) {
+            $rows[] = [
+                $order->getOrderNo(),
+                $order->getCreatedAt()->format('Y-m-d H:i'),
+                $order->getCustomer() ?? '',
+                $order->getStatus(),
+                $order->getPaymentMethod() ?? '',
+                $order->getSubtotal(),
+                $order->getTax(),
+                $order->getTotal(),
+            ];
+        }
+
+        return $csv->export('orders.csv', ['Order no', 'Created', 'Customer', 'Status', 'Payment', 'Subtotal', 'Tax', 'Total'], $rows);
     }
 
     #[Route('/new', name: 'order_new', methods: ['GET', 'POST'])]

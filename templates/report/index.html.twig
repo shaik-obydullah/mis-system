@@ -2,101 +2,115 @@
 
 {% block title %}Reports{% endblock %}
 
-{% block body %}
-<h1 class="h3 mb-4">Reports</h1>
+{% block page_title %}Reports{% endblock %}
 
-<div class="card shadow-sm mb-4">
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div class="page-heading mb-0">
+        <h1 class="h3">Reports</h1>
+        <p class="lead">{{ from }} → {{ to }}</p>
+    </div>
+    <a href="{{ path('report_export', app.request.query.all) }}" class="btn btn-outline-secondary"><i class="bi bi-download me-1"></i>Export CSV</a>
+</div>
+
+<div class="card mb-4">
     <div class="card-body">
         <form method="get" action="{{ path('report_index') }}" class="row g-2 align-items-end">
             <div class="col-auto">
                 <label for="from" class="form-label small mb-1">From</label>
-                <input type="date" id="from" name="from" value="{{ from }}" class="form-control form-control-sm">
+                <input type="date" id="from" name="from" value="{{ from }}" class="form-control">
             </div>
             <div class="col-auto">
                 <label for="to" class="form-label small mb-1">To</label>
-                <input type="date" id="to" name="to" value="{{ to }}" class="form-control form-control-sm">
+                <input type="date" id="to" name="to" value="{{ to }}" class="form-control">
             </div>
             <div class="col-auto">
-                <button type="submit" class="btn btn-sm btn-outline-primary">Generate</button>
+                <button type="submit" class="btn btn-outline-primary">Generate</button>
             </div>
         </form>
     </div>
 </div>
 
-<div class="row g-3 mb-4">
-    <div class="col-sm-6 col-xl-2">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <div class="text-muted small">Sales</div>
-                <div class="fs-5 fw-semibold">{{ report.sales|money }}</div>
-                <div class="text-muted small">{{ report.orders }} order(s)</div>
+<div class="row g-4 mb-4">
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-indigo"><i class="bi bi-cash-stack"></i></div>
+            <div>
+                <div class="stat-label">Sales</div>
+                <div class="stat-value fs-4">{{ report.sales|money }}</div>
+                <div class="stat-sub">{{ report.orders }} order(s)</div>
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-2">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <div class="text-muted small">COGS</div>
-                <div class="fs-5 fw-semibold">{{ report.cogs|money }}</div>
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-slate"><i class="bi bi-boxes"></i></div>
+            <div>
+                <div class="stat-label">COGS</div>
+                <div class="stat-value fs-4">{{ report.cogs|money }}</div>
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-2">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <div class="text-muted small">Gross profit</div>
-                <div class="fs-5 fw-semibold text-success">{{ report.gross_profit|money }}</div>
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-emerald"><i class="bi bi-graph-up-arrow"></i></div>
+            <div>
+                <div class="stat-label">Gross profit</div>
+                <div class="stat-value fs-4 text-success">{{ report.gross_profit|money }}</div>
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-2">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <div class="text-muted small">Expenses</div>
-                <div class="fs-5 fw-semibold text-danger">{{ report.expenses|money }}</div>
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-rose"><i class="bi bi-wallet2"></i></div>
+            <div>
+                <div class="stat-label">Expenses</div>
+                <div class="stat-value fs-4 text-danger">{{ report.expenses|money }}</div>
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-2">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <div class="text-muted small">Net profit</div>
-                <div class="fs-5 fw-semibold">{{ report.net_profit|money }}</div>
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-amber"><i class="bi bi-piggy-bank"></i></div>
+            <div>
+                <div class="stat-label">Net profit</div>
+                <div class="stat-value fs-4">{{ report.net_profit|money }}</div>
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-2">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <div class="text-muted small">Gross margin</div>
-                <div class="fs-5 fw-semibold">{{ report.sales > 0 ? (report.gross_profit / report.sales * 100)|round(1) : 0 }}%</div>
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-sky"><i class="bi bi-percent"></i></div>
+            <div>
+                <div class="stat-label">Gross margin</div>
+                <div class="stat-value fs-4">{{ report.sales > 0 ? (report.gross_profit / report.sales * 100)|round(1) : 0 }}%</div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row g-3 mb-4">
+<div class="row g-4 mb-4">
     <div class="col-lg-8">
-        <div class="card shadow-sm h-100">
+        <div class="card h-100">
             <div class="card-header">Sales by day</div>
-            <div class="card-body">
-                <canvas id="salesChart" height="110"></canvas>
+            <div class="card-body" style="height: 300px;">
+                <canvas id="salesChart"></canvas>
             </div>
         </div>
     </div>
     <div class="col-lg-4">
-        <div class="card shadow-sm h-100">
+        <div class="card h-100">
             <div class="card-header">Sales by category</div>
-            <div class="card-body">
-                <canvas id="categoryChart" height="110"></canvas>
+            <div class="card-body" style="height: 300px;">
+                <canvas id="categoryChart"></canvas>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row g-3">
+<div class="row g-4 mb-4">
     <div class="col-lg-6">
-        <div class="card shadow-sm h-100">
+        <div class="card h-100">
             <div class="card-header">Expenses by category</div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
@@ -110,7 +124,7 @@
                         {% for row in expenseBreakdown %}
                             <tr>
                                 <td>{{ row.category }}</td>
-                                <td class="text-end">{{ row.total|money }}</td>
+                                <td class="text-end fw-semibold">{{ row.total|money }}</td>
                             </tr>
                         {% else %}
                             <tr><td colspan="2" class="text-center text-muted py-4">No expenses in range.</td></tr>
@@ -121,7 +135,7 @@
         </div>
     </div>
     <div class="col-lg-6">
-        <div class="card shadow-sm h-100">
+        <div class="card h-100">
             <div class="card-header">Top products</div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
@@ -137,7 +151,7 @@
                             <tr>
                                 <td>{{ row.name }}</td>
                                 <td class="text-end">{{ row.qty }}</td>
-                                <td class="text-end">{{ row.revenue|money }}</td>
+                                <td class="text-end fw-semibold">{{ row.revenue|money }}</td>
                             </tr>
                         {% else %}
                             <tr><td colspan="3" class="text-center text-muted py-4">No sales in range.</td></tr>
@@ -148,11 +162,55 @@
         </div>
     </div>
 </div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Inventory valuation</span>
+        <span class="text-muted fw-normal small">Stock on hand × unit cost</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>SKU</th>
+                    <th class="text-end">Stock</th>
+                    <th class="text-end">Unit cost</th>
+                    <th class="text-end">Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set inv_total = 0 %}
+                {% for row in inventory %}
+                    {% set inv_total = inv_total + row.value %}
+                    <tr>
+                        <td>{{ row.name }}</td>
+                        <td><code>{{ row.sku }}</code></td>
+                        <td class="text-end">{{ row.stock }}</td>
+                        <td class="text-end">{{ row.cost|money }}</td>
+                        <td class="text-end fw-semibold">{{ row.value|money }}</td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="5" class="text-center text-muted py-4">No products in inventory.</td></tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="fw-bold">
+                    <td colspan="4" class="text-end">Total inventory value</td>
+                    <td class="text-end">{{ inv_total|money }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
 {% endblock %}
 
 {% block javascripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script>
+    Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
+    Chart.defaults.color = '#64748b';
+
     const salesLabels = {{ salesByDay|map(d => d.date)|json_encode|raw }};
     const salesData = {{ salesByDay|map(d => d.total)|json_encode|raw }};
 
@@ -163,14 +221,18 @@
             datasets: [{
                 label: 'Sales',
                 data: salesData,
-                backgroundColor: 'rgba(13, 110, 253, 0.7)'
+                backgroundColor: 'rgba(79, 70, 229, 0.7)',
+                borderRadius: 6
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true } }
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(148, 163, 184, 0.15)' }, border: { display: false } },
+                x: { grid: { display: false }, border: { display: false } }
+            }
         }
     });
 
@@ -183,10 +245,17 @@
             labels: catLabels,
             datasets: [{
                 data: catData,
-                backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#0dcaf0', '#6f42c1', '#fd7e14', '#20c997']
+                backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#f43f5e', '#0ea5e9', '#8b5cf6', '#f97316', '#14b8a6'],
+                borderWidth: 0,
+                hoverOffset: 6
             }]
         },
-        options: { responsive: true, maintainAspectRatio: false }
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '68%',
+            plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', padding: 14 } } }
+        }
     });
 </script>
 {% endblock %}

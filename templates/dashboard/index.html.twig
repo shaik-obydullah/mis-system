@@ -2,86 +2,94 @@
 
 {% block title %}Dashboard{% endblock %}
 
-{% block body %}
-<h1 class="h3 mb-4">Dashboard</h1>
+{% block page_title %}Dashboard{% endblock %}
 
-<div class="row g-3 mb-4">
-    <div class="col-sm-6 col-xl-3">
-        <div class="card border-start border-primary border-4 shadow-sm">
-            <div class="card-body">
-                <div class="text-muted small">Today's Sales</div>
-                <div class="fs-4 fw-semibold">{{ dashboard.today_sales|money }}</div>
-                <div class="text-muted small">{{ dashboard.today_orders }} order(s)</div>
+{% block body %}
+<div class="row g-4 mb-4">
+    <div class="col-6 col-md-4 col-xxl-2">
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-indigo"><i class="bi bi-cash-coin"></i></div>
+            <div>
+                <div class="stat-label">Today's Sales</div>
+                <div class="stat-value">{{ dashboard.today_sales|money }}</div>
+                <div class="stat-sub">{{ dashboard.today_orders }} order(s)</div>
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="card border-start border-success border-4 shadow-sm">
-            <div class="card-body">
-                <div class="text-muted small">Today's Profit</div>
-                <div class="fs-4 fw-semibold">{{ dashboard.today_profit|money }}</div>
-                <div class="text-muted small">Expenses: {{ dashboard.today_expenses|money }}</div>
+    <div class="col-6 col-md-4 col-xxl-2">
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-emerald"><i class="bi bi-graph-up-arrow"></i></div>
+            <div>
+                <div class="stat-label">Today's Profit</div>
+                <div class="stat-value">{{ dashboard.today_profit|money }}</div>
+                <div class="stat-sub">Expenses: {{ dashboard.today_expenses|money }}</div>
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="card border-start border-info border-4 shadow-sm">
-            <div class="card-body">
-                <div class="text-muted small">This Month Sales</div>
-                <div class="fs-4 fw-semibold">{{ dashboard.month_sales|money }}</div>
-                <div class="text-muted small">{{ dashboard.month_orders }} order(s)</div>
+    <div class="col-6 col-md-4 col-xxl-2">
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-sky"><i class="bi bi-calendar3"></i></div>
+            <div>
+                <div class="stat-label">Month Sales</div>
+                <div class="stat-value">{{ dashboard.month_sales|money }}</div>
+                <div class="stat-sub">{{ dashboard.month_orders }} order(s)</div>
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="card border-start border-warning border-4 shadow-sm">
-            <div class="card-body">
-                <div class="text-muted small">This Month Profit</div>
-                <div class="fs-4 fw-semibold">{{ dashboard.month_profit|money }}</div>
-                <div class="text-muted small">Expenses: {{ dashboard.month_expenses|money }}</div>
+    <div class="col-6 col-md-4 col-xxl-2">
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-amber"><i class="bi bi-piggy-bank"></i></div>
+            <div>
+                <div class="stat-label">Month Profit</div>
+                <div class="stat-value">{{ dashboard.month_profit|money }}</div>
+                <div class="stat-sub">Expenses: {{ dashboard.month_expenses|money }}</div>
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="card border-start border-danger border-4 shadow-sm">
-            <div class="card-body">
-                <div class="text-muted small">Low Stock Items</div>
-                <div class="fs-4 fw-semibold {{ dashboard.low_stock_count > 0 ? 'text-danger' : '' }}">{{ dashboard.low_stock_count }}</div>
+    <div class="col-6 col-md-4 col-xxl-2">
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-rose"><i class="bi bi-exclamation-triangle"></i></div>
+            <div>
+                <div class="stat-label">Low Stock</div>
+                <div class="stat-value {{ dashboard.low_stock_count > 0 ? 'text-danger' : '' }}">{{ dashboard.low_stock_count }}</div>
+                <div class="stat-sub">items below threshold</div>
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="card border-start border-secondary border-4 shadow-sm">
-            <div class="card-body">
-                <div class="text-muted small">Month COGS</div>
-                <div class="fs-4 fw-semibold">{{ dashboard.cogs|money }}</div>
+    <div class="col-6 col-md-4 col-xxl-2">
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-slate"><i class="bi bi-box-seam"></i></div>
+            <div>
+                <div class="stat-label">Month COGS</div>
+                <div class="stat-value">{{ dashboard.cogs|money }}</div>
+                <div class="stat-sub">cost of goods sold</div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row g-3 mb-4">
+<div class="row g-4 mb-4">
     <div class="col-lg-8">
-        <div class="card shadow-sm h-100">
+        <div class="card h-100">
             <div class="card-header">Sales — last 14 days</div>
-            <div class="card-body">
-                <canvas id="salesChart" height="120"></canvas>
+            <div class="card-body" style="height: 320px;">
+                <canvas id="salesChart"></canvas>
             </div>
         </div>
     </div>
     <div class="col-lg-4">
-        <div class="card shadow-sm h-100">
+        <div class="card h-100">
             <div class="card-header">Sales by category — this month</div>
-            <div class="card-body">
-                <canvas id="categoryChart" height="120"></canvas>
+            <div class="card-body" style="height: 320px;">
+                <canvas id="categoryChart"></canvas>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row g-3">
+<div class="row g-4">
     <div class="col-lg-7">
-        <div class="card shadow-sm">
+        <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span>Recent orders</span>
                 <a href="{{ path('order_index') }}" class="btn btn-sm btn-outline-secondary">View all</a>
@@ -104,12 +112,12 @@
                                 <td>{{ order.customer ?? '—' }}</td>
                                 <td>
                                     {% if order.status == 'paid' %}<span class="badge bg-success">Paid</span>
-                                    {% elseif order.status == 'open' %}<span class="badge bg-warning text-dark">Open</span>
+                                    {% elseif order.status == 'open' %}<span class="badge bg-warning">Open</span>
                                     {% elseif order.status == 'cancelled' %}<span class="badge bg-secondary">Cancelled</span>
                                     {% elseif order.status == 'refunded' %}<span class="badge bg-danger">Refunded</span>
                                     {% endif %}
                                 </td>
-                                <td class="text-end">{{ order.total|money }}</td>
+                                <td class="text-end fw-semibold">{{ order.total|money }}</td>
                                 <td>{{ order.createdAt|date('Y-m-d H:i') }}</td>
                             </tr>
                         {% else %}
@@ -121,7 +129,7 @@
         </div>
     </div>
     <div class="col-lg-5">
-        <div class="card shadow-sm">
+        <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span>Low stock</span>
                 <a href="{{ path('product_index') }}" class="btn btn-sm btn-outline-secondary">Products</a>
@@ -156,6 +164,9 @@
 {% block javascripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script>
+    Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
+    Chart.defaults.color = '#64748b';
+
     const salesLabels = {{ salesByDay|map(d => d.date)|json_encode|raw }};
     const salesData = {{ salesByDay|map(d => d.total)|json_encode|raw }};
 
@@ -166,17 +177,23 @@
             datasets: [{
                 label: 'Sales',
                 data: salesData,
-                borderColor: '#0d6efd',
-                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                borderColor: '#4f46e5',
+                backgroundColor: 'rgba(79, 70, 229, 0.12)',
                 fill: true,
-                tension: 0.3
+                tension: 0.35,
+                pointRadius: 3,
+                pointBackgroundColor: '#4f46e5',
+                borderWidth: 2.5
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true } }
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(148, 163, 184, 0.15)' }, border: { display: false } },
+                x: { grid: { display: false }, border: { display: false } }
+            }
         }
     });
 
@@ -189,10 +206,17 @@
             labels: catLabels,
             datasets: [{
                 data: catData,
-                backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#0dcaf0', '#6f42c1', '#fd7e14']
+                backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#f43f5e', '#0ea5e9', '#8b5cf6', '#f97316', '#14b8a6'],
+                borderWidth: 0,
+                hoverOffset: 6
             }]
         },
-        options: { responsive: true, maintainAspectRatio: false }
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '68%',
+            plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', padding: 14 } } }
+        }
     });
 </script>
 {% endblock %}

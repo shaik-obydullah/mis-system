@@ -2,13 +2,48 @@
 
 {% block title %}Products{% endblock %}
 
+{% block page_title %}Products{% endblock %}
+
 {% block body %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0">Products</h1>
-    <a href="{{ path('product_new') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>New product</a>
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div class="page-heading mb-0">
+        <h1 class="h3">Products</h1>
+        <p class="lead">{{ pagination.total }} item(s)</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ path('product_export') }}" class="btn btn-outline-secondary"><i class="bi bi-download me-1"></i>Export CSV</a>
+        <a href="{{ path('product_new') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>New product</a>
+    </div>
 </div>
 
-<div class="card shadow-sm">
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" action="{{ path('product_index') }}" class="row g-2 align-items-end">
+            <div class="col-12 col-md-6">
+                <label for="q" class="form-label small mb-1">Search</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" id="q" name="q" value="{{ q }}" class="form-control" placeholder="Name or SKU…">
+                </div>
+            </div>
+            <div class="col-8 col-md-4">
+                <label for="category" class="form-label small mb-1">Category</label>
+                <select id="category" name="category" class="form-select">
+                    <option value="0">All categories</option>
+                    {% for c in categories %}
+                        <option value="{{ c.id }}" {% if categoryFilter == c.id %}selected{% endif %}>{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-4 col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-outline-primary flex-grow-1">Filter</button>
+                <a href="{{ path('product_index') }}" class="btn btn-outline-secondary">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
             <thead>
@@ -27,7 +62,7 @@
             <tbody>
                 {% for product in products %}
                     <tr>
-                        <td>{{ product.name }}</td>
+                        <td class="fw-semibold">{{ product.name }}</td>
                         <td><code>{{ product.sku }}</code></td>
                         <td>{{ product.category ? product.category.name : '—' }}</td>
                         <td>{{ product.supplier ? product.supplier.name : '—' }}</td>
@@ -39,7 +74,7 @@
                             {% else %}<span class="badge bg-secondary">Inactive</span>{% endif %}
                         </td>
                         <td class="text-end">
-                            <a href="{{ path('product_edit', {'id': product.id}) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+                            <a href="{{ path('product_edit', {'id': product.id}) }}" class="btn btn-sm btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></a>
                             <form action="{{ path('product_delete', {'id': product.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Delete {{ product.name }}?');">
                                 <input type="hidden" name="_token" value="{{ csrf_token('delete_product_' ~ product.id) }}">
                                 <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
@@ -52,5 +87,10 @@
             </tbody>
         </table>
     </div>
+    {% if pagination.pages > 1 %}
+        <div class="card-body border-top py-3">
+            {{ include('_pagination.html.twig', {pagination: pagination, route: 'product_index'}) }}
+        </div>
+    {% endif %}
 </div>
 {% endblock %}
